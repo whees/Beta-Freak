@@ -21,6 +21,7 @@ except:
     print('ERROR: Trainer failed to load.')
     raise
     
+
 print('Training...')
 for name in tqdm(names*R):
     try:
@@ -36,9 +37,10 @@ try:
     out_path = f'wts/weights_{R}-{L}.csv'
     df = pd.DataFrame(trainer.weights, columns=None)
     df.to_csv(out_path, index=False)
+    print('Training Complete!')
+    print('Weights saved as', out_path)
 except:
     print('ERROR: Weights could not be saved.')
     raise
-print('Training Complete!')
-print('Weights saved as', out_path)
+
 

@@ -32,19 +32,26 @@ class Trainer:
     
     def _send_(self, climb, step_size = 0.25):
         roles = climb.roles()
-        weights = self._copy_(self.weights)
+        new_weights = {}
         
         for l in range(NN):
             u, v = self._unflatten_(l)
             for x in roles[u]:
                 for y in roles[v]:
-                    weights[l][x][y] += step_size * (-1) ** randrange(2)
-                    this_score = self._score_(climb, weights)
-                    if this_score < self.low_score or not randrange(100):
-                        self.weights[l][x][y],weights[l][x][y] = weights[l][x][y],self.weights[l][x][y]
+                    old_weight = self.weights[l][x][y]
+                    self.weights[l][x][y] += step_size * (-1) ** randrange(2)
+                    this_score = self._score_(climb)
+                    if this_score < self.low_score:
+                        new_weights[(l,x,y)] = self.weights[l][x][y]
                         self.low_score = this_score
-                    else:
-                        weights[l][x][y] = self.weights[l][x][y]
+                    self.weights[l][x][y] = old_weight
+                    
+        self._update_(new_weights)
+        
+    def _update_(self, new_weights):
+        for key,value in new_weights.items():
+            l,x,y = key
+            self.weights[l][x][y] = value
     
     def _score_(self, climb, weights = None):
         return abs(climb.grade - self.grade(climb, weights))
