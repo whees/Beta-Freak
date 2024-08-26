@@ -25,8 +25,11 @@ class Librarian:
             fetch =  self.cur.execute(query).fetchone()
             roles = self._unpack_(fetch[0])
             grade = fetch[1]
+        except KeyboardInterrupt:
+            raise
         except:
             raise LibError
+        
         result = c.Climb(name, roles, grade)
         return result
     
