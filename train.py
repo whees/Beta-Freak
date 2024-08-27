@@ -1,9 +1,13 @@
 import librarian as l
 import rsc.trainer as t
-from tqdm import tqdm 
+import rsc.progress_bar as pb
 import csv
 from numpy import mean
 import sys
+from termcolor import colored
+import os
+
+os.system('color')
 
 try:
     R = int(sys.argv[0])
@@ -30,21 +34,30 @@ except:
 print('Training...') 
 for r in range(R):
     try:
-        pbar = tqdm(names)
+        pbar = pb.Pb(names[:10], f'Session {r}:')
         scores = []
+        max_score = 0
+        worst_name = ''
         for name in pbar:
             try:
                 climb = librarian.get_climb(name)
-                scores += [trainer.project(climb, sesh_length = L)]
-                pbar.set_description(f'Session {r}')
+                score = trainer.project(climb, sesh_length = L)
+                scores += [score]
+                if score>max_score:
+                    max_score = score
+                    worst_name = name
+                if len(name) >= 10:
+                    name = name[:10]
+                else:
+                    name += ' ' * (10 - len(name))
+                pbar.suff = f'{name} <= {colored(round(max_score,3),"red")}'
             except l.LibError:
                 continue
             except:
                 raise
-        print('Average score:', round(mean(scores),3))
+        pbar.complete(colored(f'Session {r}: ','green') + colored(round(mean(scores),3),'yellow') + f' <= {colored(round(max_score,3),"red")} on {worst_name}')
     except:
         break
-        
     
 print('\nSaving...')
 try: 
